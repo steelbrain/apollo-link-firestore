@@ -2,7 +2,7 @@ import { Operation } from 'apollo-link'
 import type {
   OperationDefinitionNode,
   SelectionNode,
-  ArgumentNode,
+  ValueNode,
   FragmentDefinitionNode,
   DirectiveNode,
 } from 'graphql/language/ast'
@@ -17,28 +17,31 @@ function getDirective({ selection, name }: { selection: SelectionNode; name: str
   )
 }
 
-function getArgumentValue({ arg, operation }: { arg: ArgumentNode; operation: Operation }) {
-  if (arg.value.kind === 'Variable') {
-    const value = operation.variables[arg.value.name.value]
+function getArgumentValue({ arg, operation }: { arg: ValueNode; operation: Operation }): any {
+  if (arg.kind === 'Variable') {
+    const value = operation.variables[arg.name.value]
     if (typeof value === 'undefined') {
-      throw new Error(`Use of undefined variable: ${arg.value.name.value}`)
+      throw new Error(`Use of undefined variable: ${arg.name.value}`)
     }
 
     return value == null ? null : value
   }
 
   // Only process literal values
-  if (arg.value.kind === 'StringValue') {
-    return arg.value.value
+  if (arg.kind === 'StringValue') {
+    return arg.value
   }
-  if (arg.value.kind === 'BooleanValue') {
-    return arg.value.value
+  if (arg.kind === 'BooleanValue') {
+    return arg.value
   }
-  if (arg.value.kind === 'IntValue') {
-    return parseInt(arg.value.value, 10)
+  if (arg.kind === 'IntValue') {
+    return parseInt(arg.value, 10)
   }
-  if (arg.value.kind === 'FloatValue') {
-    return parseFloat(arg.value.value)
+  if (arg.kind === 'FloatValue') {
+    return parseFloat(arg.value)
+  }
+  if (arg.kind === 'ListValue') {
+    return arg.values.map((item) => getArgumentValue({ arg: item, operation }))
   }
 
   return null
@@ -68,7 +71,7 @@ function getDirectiveValue({
   }
 
   return getArgumentValue({
-    arg: directiveArg,
+    arg: directiveArg.value,
     operation,
   })
 }
