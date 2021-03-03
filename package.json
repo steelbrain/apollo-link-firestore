@@ -1,6 +1,6 @@
 {
   "name": "@steelbrain/apollo-link-firestore",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Query Google Firebase Firestore with GraphQL in Apollo",
   "main": "lib/cjs/index.js",
   "typings": "lib/typings/index.d.ts",
