@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  build_and_test:
+    working_directory: ~/project
+    docker:
+      - image: node:14
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore Cache
+          keys:
+            - cache-v1-{{ checksum "yarn.lock" }}
+            - cache-v1-
+      - run:
+          name: Packager Version
+          command: yarn --version
+      - run:
+          name: Install Dependencies
+          command: yarn
+      - save_cache:
+          name: Save Cache
+          key: cache-v1-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules/
+      - run:
+          name: Lint sources
+          command: yarn lint
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build_and_test
