@@ -1,4 +1,4 @@
-import { Operation } from 'apollo-link'
+import type { Operation } from '@apollo/client'
 import type {
   OperationDefinitionNode,
   SelectionNode,

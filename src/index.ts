@@ -1,5 +1,5 @@
 import type firebase from 'firebase'
-import { concat, ApolloLink } from 'apollo-link'
+import { concat, ApolloLink } from '@apollo/client'
 
 import QueryLink from './QueryLink'
 import SubscriptionLink from './SubscriptionLink'

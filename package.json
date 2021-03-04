@@ -29,7 +29,7 @@
   ],
   "homepage": "https://github.com/steelbrain/apollo-link-firestore#readme",
   "devDependencies": {
-    "apollo-link": "^1.2.13",
+    "@apollo/client": "^3",
     "eslint-config-steelbrain": "^11.0.0",
     "firebase": "^8.2.9",
     "graphql": "^15.5.0",
@@ -40,7 +40,7 @@
     "lodash": "^4"
   },
   "peerDependencies": {
-    "apollo-link": "^1"
+    "@apollo/client": "^3"
   },
   "engines": {
     "node": ">= 8"

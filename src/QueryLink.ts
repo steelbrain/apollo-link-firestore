@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import type firebase from 'firebase'
 import { hasDirectives, getOperationName, getOperationDefinition } from 'apollo-utilities'
-import { ApolloLink, Operation, NextLink, Observable, FetchResult } from 'apollo-link'
+import { ApolloLink, Operation, NextLink, Observable, FetchResult } from '@apollo/client'
 
 import parse from './parse'
 import execute from './execute'
