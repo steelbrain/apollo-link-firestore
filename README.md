@@ -5,16 +5,15 @@ Query Google Firebase Firestore with GraphQL in Apollo. Allows doing joins in Fi
 #### Installation
 
 ```
-yarn add apollo-link @steelbrain/apollo-link-firestore
+yarn add @apollo/client @steelbrain/apollo-link-firestore
 # or
-npm install apollo-link @steelbrain/apollo-link-firestore
+npm install @apollo/client @steelbrain/apollo-link-firestore
 ```
 
 To use this Apollo Link adapter, modify your Apollo client creation like so
 
 ```js
-import { from } from 'apollo-link'
-import { ApolloClient, InMemoryCache } from '@apollo/client'
+import { ApolloClient, InMemoryCache, from } from '@apollo/client'
 import createFirestoreLink from '@steelbrain/apollo-link-firestore'
 
 const client = new ApolloClient({
