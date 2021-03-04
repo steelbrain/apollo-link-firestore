@@ -36,6 +36,9 @@ Here is an example query that showcases the API
 ```js
 const query = gql`
   subscription Test {
+    conversation @firestore(collection: "conversations", where: [["$id", "==", "NMI01qpXobQwd4HtKhgU"]]) {
+      title
+    }
     conversations2 @firestore(collection: "conversations", where: [["id", ">", 0]]) {
       title
     }

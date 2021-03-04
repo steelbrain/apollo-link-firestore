@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign,no-underscore-dangle */
 
-import type firebase from 'firebase'
+import firebase from 'firebase'
 
 import { FirestoreNode, OperationType } from './types'
 
@@ -73,7 +73,11 @@ function getDatabaseRef({
     }
     if (where != null) {
       where.forEach((whereItem) => {
-        ref = ref.where(whereItem[0], whereItem[1], whereItem[2])
+        if (whereItem[0] === '$id') {
+          ref = ref.where(firebase.firestore.FieldPath.documentId(), whereItem[1], whereItem[2])
+        } else {
+          ref = ref.where(whereItem[0], whereItem[1], whereItem[2])
+        }
       })
     }
     if (limit != null) {
