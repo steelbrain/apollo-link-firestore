@@ -76,7 +76,7 @@ const query = gql`
 
 <details>
 
-<summary>Here's the output of the query</summary>
+<summary>Here's the output of the query (outdated)</summary>
 
 ```json
 {
