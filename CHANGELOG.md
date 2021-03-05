@@ -1,3 +1,7 @@
+### 0.0.4
+
+- Replace `firebase` import with `firebase/app` import
+
 ### 0.0.3
 
 - Add support for `$id` in `where` clause of `firestore` directive

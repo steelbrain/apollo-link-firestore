@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign,no-underscore-dangle */
 
-import firebase from 'firebase'
+import firebase from 'firebase/app'
 
 import { FirestoreNode, OperationType } from './types'
 
