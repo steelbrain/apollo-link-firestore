@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import type firebase from 'firebase'
+import type { Firestore } from 'firebase/firestore'
 import { hasDirectives, getOperationName, getOperationDefinition } from 'apollo-utilities'
 import { ApolloLink, Operation, NextLink, Observable, FetchResult } from '@apollo/client'
 
@@ -7,8 +7,8 @@ import parse from './parse'
 import execute from './execute'
 
 export default class QueryLink extends ApolloLink {
-  firestore: firebase.firestore.Firestore
-  constructor({ firestore }: { firestore: firebase.firestore.Firestore }) {
+  firestore: Firestore
+  constructor({ firestore }: { firestore: Firestore }) {
     super()
     this.firestore = firestore
   }

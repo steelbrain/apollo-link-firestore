@@ -1,6 +1,6 @@
 {
   "name": "@steelbrain/apollo-link-firestore",
-  "version": "0.0.4",
+  "version": "1.0.1",
   "description": "Query Google Firebase Firestore with GraphQL in Apollo",
   "main": "lib/cjs/index.js",
   "typings": "lib/typings/index.d.ts",
@@ -31,7 +31,7 @@
   "devDependencies": {
     "@apollo/client": "^3",
     "eslint-config-steelbrain": "^11.0.0",
-    "firebase": "^8.2.9",
+    "firebase": "^9.6.1",
     "graphql": "^15.5.0",
     "typescript": "^4.0.3"
   },
@@ -40,7 +40,7 @@
     "lodash": "^4"
   },
   "peerDependencies": {
-    "firebase": "^8",
+    "firebase": "^9",
     "@apollo/client": "^3"
   },
   "engines": {
