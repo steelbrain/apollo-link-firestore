@@ -1,4 +1,4 @@
-### 1.0.1
+### Upcoming
 
 - Upgrade firebase to 9.6.1, requiring peer dependencies to be using version 9^
 
