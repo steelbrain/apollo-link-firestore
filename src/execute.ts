@@ -1,13 +1,26 @@
 /* eslint-disable no-param-reassign,no-underscore-dangle */
 
-import firebase from 'firebase/app'
-
+import {
+  collection,
+  doc,
+  DocumentData,
+  documentId,
+  DocumentSnapshot,
+  Firestore,
+  getDocs,
+  limit,
+  limitToLast,
+  onSnapshot,
+  orderBy,
+  query,
+  QueryConstraint,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+  where,
+} from 'firebase/firestore'
 import { FirestoreNode, OperationType } from './types'
 
-function normalizeFirestoreDoc(
-  document: firebase.firestore.DocumentSnapshot,
-  node: FirestoreNode,
-): Record<string, any> | null {
+function normalizeFirestoreDoc(document: DocumentSnapshot, node: FirestoreNode): Record<string, any> | null {
   const data = document.data()
   if (data == null) {
     return null
@@ -30,11 +43,11 @@ function getDatabaseRef({
   nodeParentSnap,
 }: {
   cache: Map<string, any>
-  firestore: firebase.firestore.Firestore
+  firestore: Firestore
   node: FirestoreNode
   nodeValue: any
   nodeParent: FirestoreNode | null | undefined
-  nodeParentSnap: firebase.firestore.DocumentSnapshot | null | undefined
+  nodeParentSnap: DocumentSnapshot | null | undefined
 }) {
   let cacheKey = `${node.__cache_key}__$`
   if (node.subcollection != null) {
@@ -57,35 +70,34 @@ function getDatabaseRef({
     if (nodeParent == null || nodeParentSnap == null) {
       throw new Error('context not found')
     }
-    ref = nodeParentSnap.ref.collection(node.subcollection)
+    ref = collection(nodeParentSnap.ref, node.subcollection)
   } else if (node.collection != null) {
-    ref = firestore.collection(node.collection)
+    ref = collection(firestore, node.collection)
     if (nodeParent != null) {
-      ref = ref.doc(`${nodeValue}`)
+      ref = doc(ref, `${nodeValue}`)
     }
   } else {
     throw new Error('Ref not found')
   }
   if (node.variables != null) {
-    const { order, where, limit, limitToLast } = node.variables
+    const { order, where: whereClause, limit: limitClause, limitToLast: limitToLastClause } = node.variables
+    const constraints: QueryConstraint[] = []
     if (order != null) {
-      ref = ref.orderBy(order[0], order[1])
+      constraints.push(orderBy(order[0], order[1]))
     }
-    if (where != null) {
-      where.forEach((whereItem) => {
-        if (whereItem[0] === '$id') {
-          ref = ref.where(firebase.firestore.FieldPath.documentId(), whereItem[1], whereItem[2])
-        } else {
-          ref = ref.where(whereItem[0], whereItem[1], whereItem[2])
-        }
-      })
+    if (whereClause != null) {
+      const whereConstraints = whereClause.map((whereItem) =>
+        where(whereItem[0] === '$id' ? documentId() : whereItem[0], whereItem[1], whereItem[2]),
+      )
+      constraints.push(...whereConstraints)
     }
-    if (limit != null) {
-      ref = ref.limit(limit)
+    if (limitClause != null) {
+      constraints.push(limit(limitClause))
     }
-    if (limitToLast != null) {
-      ref = ref.limitToLast(limitToLast)
+    if (limitToLastClause != null) {
+      constraints.push(limitToLast(limitToLastClause))
     }
+    ref = query(ref, ...constraints)
   }
 
   cache.set(cacheKey, ref)
@@ -102,7 +114,7 @@ export default function executeFirestoreNodes({
   onValue,
 }: {
   context: { nodeParent: FirestoreNode; nodeParentSnap: any } | null
-  firestore: firebase.firestore.Firestore
+  firestore: Firestore
   nodes: FirestoreNode[]
   parentValue: any | null
   operationType: OperationType
@@ -149,7 +161,7 @@ export default function executeFirestoreNodes({
     node: FirestoreNode
     nodeValue: any
     nodeParent: FirestoreNode | null | undefined
-    nodeParentSnap: firebase.firestore.DocumentSnapshot | null | undefined
+    nodeParentSnap: DocumentSnapshot | null | undefined
     onNodeValue: (valueNode: FirestoreNode, value: any) => void
   }) {
     if (node.collection != null && Array.isArray(nodeValue)) {
@@ -216,7 +228,7 @@ export default function executeFirestoreNodes({
 
     result.totalRefs += 1
     let lastResult: ReturnType<typeof executeFirestoreNodes> | null = null
-    function handleValue(value: firebase.firestore.QuerySnapshot | firebase.firestore.QueryDocumentSnapshot) {
+    function handleValue(value: QuerySnapshot | QueryDocumentSnapshot) {
       const isForeginKeyReference = context != null && node.collection
       if (isForeginKeyReference && 'forEach' in value) {
         throw new Error('Unrecognized firestore snapshot signature')
@@ -228,8 +240,8 @@ export default function executeFirestoreNodes({
       if ('forEach' in value) {
         // Collection
         const newValues: (Record<string, any> | null)[] = []
-        value.forEach((doc) => {
-          newValues.push(normalizeFirestoreDoc(doc, node))
+        value.forEach((docSnap) => {
+          newValues.push(normalizeFirestoreDoc(docSnap, node))
         })
         newValue = newValues
       } else {
@@ -273,9 +285,9 @@ export default function executeFirestoreNodes({
       nodeParentSnap,
     })
     if (operationType === 'query') {
-      ref.get().then(handleValue)
+      getDocs<DocumentData>(ref).then(handleValue)
     } else {
-      const unlisten = ref.onSnapshot(handleValue)
+      const unlisten = onSnapshot(ref, handleValue)
       cleanup.push(() => {
         unlisten()
         if (lastResult) {
