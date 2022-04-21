@@ -115,6 +115,7 @@ export default function executeFirestoreNodes({
   operationType,
   cache,
   onValue,
+  onError,
 }: {
   context: { nodeParent: FirestoreNode; nodeParentSnap: any } | null
   firestore: Firestore
@@ -123,6 +124,7 @@ export default function executeFirestoreNodes({
   operationType: OperationType
   cache: Map<string, any>
   onValue: (value: any) => void
+  onError: (err: Error) => void
 }): {
   value: any
   totalRefs: number
@@ -222,6 +224,7 @@ export default function executeFirestoreNodes({
           handleValueSet()
           onNodeValue(node, value)
         },
+        onError,
       })
       cleanup.push(() => {
         response.cleanup()
@@ -276,6 +279,7 @@ export default function executeFirestoreNodes({
           handleValueSet()
           onNodeValue(node, resolvedValue)
         },
+        onError,
       })
     }
 
@@ -288,9 +292,9 @@ export default function executeFirestoreNodes({
       nodeParentSnap,
     })
     if (operationType === 'query') {
-      resolver(ref).then(handleValue)
+      resolver(ref).then(handleValue, onError)
     } else {
-      const unlisten = onSnapshot(ref, handleValue)
+      const unlisten = onSnapshot(ref, handleValue, onError)
       cleanup.push(() => {
         unlisten()
         if (lastResult) {

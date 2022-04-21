@@ -53,6 +53,7 @@ export default class QueryLink extends ApolloLink {
           observer.complete()
           response.cleanup()
         },
+        onError: observer.error,
       })
       return response.cleanup
     })
