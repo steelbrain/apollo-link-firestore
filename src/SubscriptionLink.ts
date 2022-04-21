@@ -58,6 +58,7 @@ export default class SubscriptionLink extends ApolloLink {
         operationType: 'subscribe',
         cache,
         onValue: debouncedNext,
+        onError: observer.error,
       })
       return response.cleanup
     })

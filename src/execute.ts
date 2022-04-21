@@ -8,6 +8,7 @@ import {
   DocumentSnapshot,
   Firestore,
   getDocs,
+  getDoc,
   limit,
   limitToLast,
   onSnapshot,
@@ -66,6 +67,7 @@ function getDatabaseRef({
   }
 
   let ref: any
+  let resolver: any = getDocs
   if (node.subcollection != null) {
     if (nodeParent == null || nodeParentSnap == null) {
       throw new Error('context not found')
@@ -75,6 +77,7 @@ function getDatabaseRef({
     ref = collection(firestore, node.collection)
     if (nodeParent != null) {
       ref = doc(ref, `${nodeValue}`)
+      resolver = getDoc
     }
   } else {
     throw new Error('Ref not found')
@@ -100,8 +103,8 @@ function getDatabaseRef({
     ref = query(ref, ...constraints)
   }
 
-  cache.set(cacheKey, ref)
-  return ref
+  cache.set(cacheKey, [ref, resolver])
+  return [ref, resolver]
 }
 
 export default function executeFirestoreNodes({
@@ -112,6 +115,7 @@ export default function executeFirestoreNodes({
   operationType,
   cache,
   onValue,
+  onError,
 }: {
   context: { nodeParent: FirestoreNode; nodeParentSnap: any } | null
   firestore: Firestore
@@ -120,6 +124,7 @@ export default function executeFirestoreNodes({
   operationType: OperationType
   cache: Map<string, any>
   onValue: (value: any) => void
+  onError: (err: Error) => void
 }): {
   value: any
   totalRefs: number
@@ -219,6 +224,7 @@ export default function executeFirestoreNodes({
           handleValueSet()
           onNodeValue(node, value)
         },
+        onError,
       })
       cleanup.push(() => {
         response.cleanup()
@@ -273,10 +279,11 @@ export default function executeFirestoreNodes({
           handleValueSet()
           onNodeValue(node, resolvedValue)
         },
+        onError,
       })
     }
 
-    const ref = getDatabaseRef({
+    const [ref, resolver] = getDatabaseRef({
       cache,
       firestore,
       node,
@@ -285,9 +292,9 @@ export default function executeFirestoreNodes({
       nodeParentSnap,
     })
     if (operationType === 'query') {
-      getDocs<DocumentData>(ref).then(handleValue)
+      resolver(ref).then(handleValue, onError)
     } else {
-      const unlisten = onSnapshot(ref, handleValue)
+      const unlisten = onSnapshot(ref, handleValue, onError)
       cleanup.push(() => {
         unlisten()
         if (lastResult) {
