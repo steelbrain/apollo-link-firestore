@@ -1,3 +1,8 @@
+### 0.1.1
+
+- Fix regression affecting single-documents from v0.1.0
+- Fix bubbling up of Firebase errors in GraphQL
+
 ### 0.1.0
 
 - Upgrade firebase to 9.6.1, requiring peer dependencies to be using version 9^ (Thanks @jwei98)
