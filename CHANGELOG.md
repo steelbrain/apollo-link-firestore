@@ -1,3 +1,7 @@
+### 0.1.2
+
+- Internal refactor -- added Typescript typings (Thanks @jwei98)
+
 ### 0.1.1
 
 - Fix regression affecting single-documents from v0.1.0
