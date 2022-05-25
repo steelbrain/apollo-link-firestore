@@ -50,7 +50,7 @@ function getDatabaseRef({
   nodeValue: any
   nodeParent: FirestoreNode | null | undefined
   nodeParentSnap: DocumentSnapshot | null | undefined
-}): DocumentReference | Query {
+}): DocumentReference | Query | CollectionReference {
   let cacheKey = `${node.__cache_key}__$`
   if (node.subcollection != null) {
     if (nodeParent == null || nodeParentSnap == null) {
@@ -68,21 +68,24 @@ function getDatabaseRef({
   }
 
   let collectionRef: CollectionReference
-  let ref: DocumentReference | Query | null = null
+  let ref: DocumentReference | Query | CollectionReference | null = null
   if (node.subcollection != null) {
     if (nodeParent == null || nodeParentSnap == null) {
       throw new Error('context not found')
     }
     collectionRef = collection(nodeParentSnap.ref, node.subcollection)
+    ref = collectionRef
   } else if (node.collection != null) {
     collectionRef = collection(firestore, node.collection)
+    ref = collectionRef
     if (nodeParent != null) {
       ref = doc(collectionRef, `${nodeValue}`)
     }
   } else {
     throw new Error('Ref not found')
   }
-  if (ref == null && node.variables != null) {
+
+  if (node.variables != null) {
     const { order, where: whereClause, limit: limitClause, limitToLast: limitToLastClause } = node.variables
     const constraints: QueryConstraint[] = []
     if (order != null) {
@@ -101,10 +104,6 @@ function getDatabaseRef({
       constraints.push(limitToLast(limitToLastClause))
     }
     ref = query(collectionRef, ...constraints)
-  }
-
-  if (ref == null) {
-    throw new Error('Ref not found')
   }
 
   cache.set(cacheKey, ref)
